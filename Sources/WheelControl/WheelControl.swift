@@ -41,8 +41,9 @@ public struct WheelControl: View {
     @Binding var value: Float
     private var range: ClosedRange<Float>
     private var orientation: Orientation = .auto
+    private var onChange: ((_ value: Float) -> ())? = nil
     private var onCommit: ((_ value: Float) -> ())? = nil
-    
+
     @State private var scaleIdx = 0
     @State private var lastDrag: CGFloat = 0
     
@@ -54,10 +55,11 @@ public struct WheelControl: View {
         WheelControl.lineWidths[scaleIdx]
     }
 
-    public init(value: Binding<Float>, range: ClosedRange<Float>, orientation: Orientation = .auto, onCommit: ((Float) -> ())? = nil) {
+    public init(value: Binding<Float>, range: ClosedRange<Float>, orientation: Orientation = .auto, onChange: ((Float) -> ())? = nil, onCommit: ((Float) -> ())? = nil) {
         self._value = value
         self.range = range
         self.orientation = orientation
+        self.onChange = onChange
         self.onCommit = onCommit
     }
     
@@ -94,6 +96,9 @@ public struct WheelControl: View {
                                     DragGesture(minimumDistance: 0.0)
                         .onChanged { drag in
                             onDragChanged(translation: drag.translation, size: geometry.size)
+                            if let onChange = self.onChange {
+                                onChange(self.value)
+                            }
                         }
                         .onEnded { drag in
                             onDragEnded()
